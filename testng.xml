@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Selenium Test Suite">
+
+    <test name="Navigation Tests">
+        <classes>
+            <class name="com.anuj.testcases.NavigationTest"/>
+        </classes>
+    </test>
+    <test name="Logout Tests">
+        <classes>
+            <class name="com.anuj.testcases.LogoutTest"/>
+        </classes>
+    </test>
+
+    <test name="Register Tests">
+        <classes>
+            <class name="com.anuj.testcases.RegisterTest"/>
+        </classes>
+    </test>
+
+    <!-- ✅ New -->
+    <test name="Login Tests">
+        <classes>
+            <class name="com.anuj.testcases.LoginTest"/>
+        </classes>
+    </test>
+
+</suite>

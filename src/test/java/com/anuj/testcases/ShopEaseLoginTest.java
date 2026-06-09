@@ -1,4 +1,4 @@
-package com.anuj.tests;
+package com.anuj.testcases;
 
 import com.anuj.base.BaseTest;
 import com.anuj.pages.ShopEaseLoginPage;

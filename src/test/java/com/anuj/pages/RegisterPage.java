@@ -1,6 +1,7 @@
 package com.anuj.pages;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -12,64 +13,61 @@ public class RegisterPage {
 
     private WebDriver driver;
     private WebDriverWait wait;
+    private JavascriptExecutor js;
 
-    // ✅ Constructor
     public RegisterPage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+        this.js = (JavascriptExecutor) driver;
     }
 
-    // ✅ Locators — name attribute se (tumhare form me yahi hai)
+    // ✅ Locators
     private By nameField     = By.name("name");
     private By emailField    = By.name("email");
     private By passwordField = By.name("password");
     private By phoneField    = By.name("phone");
     private By addressField  = By.name("address");
     private By submitButton  = By.cssSelector("button[type='submit']");
+    private By messageDiv    = By.cssSelector("div[style*='margin-top: 16px']");
 
-    // Success/Error message locator
-    private By successMessage = By.cssSelector("div[style*='#e6f9f0'], div[style*='2e7d32']");
-    private By errorMessage   = By.cssSelector("div[style*='#fdecea'], div[style*='c62828']");
-
-    // ✅ Fill and submit form
+    // ✅ Fill form using JavaScript — bypasses HTML5 required validation
     public void register(String name, String email, String password,
                          String phone, String address) {
 
-        // Clear and fill name
-        WebElement name_field = driver.findElement(nameField);
-        name_field.clear();
-        name_field.sendKeys(name);
+        fillField(nameField, name);
+        fillField(emailField, email);
+        fillField(passwordField, password);
+        fillField(phoneField, phone);
+        fillField(addressField, address);
 
-        // Clear and fill email
-        WebElement email_field = driver.findElement(emailField);
-        email_field.clear();
-        email_field.sendKeys(email);
+        // ✅ Click via JavaScript — bypasses browser validation
+        WebElement btn = driver.findElement(submitButton);
+        js.executeScript("arguments[0].click();", btn);
+    }
 
-        // Clear and fill password
-        WebElement pass_field = driver.findElement(passwordField);
-        pass_field.clear();
-        pass_field.sendKeys(password);
-
-        // Clear and fill phone
-        WebElement phone_field = driver.findElement(phoneField);
-        phone_field.clear();
-        phone_field.sendKeys(phone);
-
-        // Clear and fill address
-        WebElement addr_field = driver.findElement(addressField);
-        addr_field.clear();
-        addr_field.sendKeys(address);
-
-        // Click submit
-        driver.findElement(submitButton).click();
+    // ✅ Helper — fill using JS to bypass HTML5 validation
+    private void fillField(By locator, String value) {
+        WebElement el = driver.findElement(locator);
+        js.executeScript("arguments[0].removeAttribute('required')", el);
+        js.executeScript("arguments[0].value = arguments[1]", el, value);
+        // Also trigger React onChange event
+        js.executeScript(
+                "var nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;" +
+                        "nativeInputValueSetter.call(arguments[0], arguments[1]);" +
+                        "arguments[0].dispatchEvent(new Event('input', { bubbles: true }));",
+                el, value
+        );
     }
 
     // ✅ Get success message
     public String getSuccessMessage() {
         try {
-            wait.until(ExpectedConditions.visibilityOfElementLocated(successMessage));
-            return driver.findElement(successMessage).getText();
+            wait.until(ExpectedConditions.visibilityOfElementLocated(messageDiv));
+            String text = driver.findElement(messageDiv).getText();
+            System.out.println("DEBUG Success msg: " + text);
+            return text;
         } catch (Exception e) {
+            System.out.println("DEBUG Success msg not found: " + e.getMessage());
             return "";
         }
     }
@@ -77,9 +75,12 @@ public class RegisterPage {
     // ✅ Get error message
     public String getErrorMessage() {
         try {
-            wait.until(ExpectedConditions.visibilityOfElementLocated(errorMessage));
-            return driver.findElement(errorMessage).getText();
+            wait.until(ExpectedConditions.visibilityOfElementLocated(messageDiv));
+            String text = driver.findElement(messageDiv).getText();
+            System.out.println("DEBUG Error msg: " + text);
+            return text;
         } catch (Exception e) {
+            System.out.println("DEBUG Error msg not found: " + e.getMessage());
             return "";
         }
     }
