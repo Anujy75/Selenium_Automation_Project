@@ -72,7 +72,7 @@ public class RegisterPage {
         }
     }
 
-    // ✅ Get error message
+    // Get error message
     public String getErrorMessage() {
         try {
             wait.until(ExpectedConditions.visibilityOfElementLocated(messageDiv));
@@ -85,7 +85,7 @@ public class RegisterPage {
         }
     }
 
-    // ✅ Click Sign In link
+    //  Click Sign In link
     public void clickSignInLink() {
         driver.findElement(By.linkText("Sign In")).click();
     }
