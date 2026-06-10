@@ -120,7 +120,7 @@ public class LogoutTest extends BaseTest {
         logoutPage.tryAccessProtectedPage();
         String url = logoutPage.getCurrentUrl();
 
-        System.out.println("✅ Session check — token: " + token + " | URL: " + url);
+        System.out.println(" Session check — token: " + token + " | URL: " + url);
 
         Assert.assertTrue(
                 token == null || url.contains("/login") || url.contains("/portal"),
