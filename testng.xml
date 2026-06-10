@@ -7,6 +7,7 @@
             <class name="com.anuj.testcases.NavigationTest"/>
         </classes>
     </test>
+
     <test name="Logout Tests">
         <classes>
             <class name="com.anuj.testcases.LogoutTest"/>
@@ -19,10 +20,16 @@
         </classes>
     </test>
 
-    <!-- ✅ New -->
     <test name="Login Tests">
         <classes>
             <class name="com.anuj.testcases.LoginTest"/>
+        </classes>
+    </test>
+
+    <!-- ✅ US0015: Product Listing Tests Added -->
+    <test name="Product Listing Tests - US0015">
+        <classes>
+            <class name="com.anuj.testcases.ProductListingTest"/>
         </classes>
     </test>
 

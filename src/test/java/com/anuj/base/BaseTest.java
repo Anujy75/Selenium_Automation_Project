@@ -44,7 +44,7 @@ public class BaseTest {
         driver.get(LOGIN_URL);
         LoginPage loginPage = new LoginPage(driver);
         loginPage.login(email, password);
-        try { Thread.sleep(2000); } catch (Exception ignored) {}
+        try { Thread.sleep(1000); } catch (Exception ignored) {}
     }
 
     /**
