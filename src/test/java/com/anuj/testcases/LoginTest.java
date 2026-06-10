@@ -23,7 +23,7 @@ public class LoginTest extends BaseTest {
         try { Thread.sleep(3000); } catch (Exception ignored) {}
 
         String url = loginPage.getCurrentUrl();
-        System.out.println("✅ After login URL: " + url);
+        System.out.println("After login URL: " + url);
 
         Assert.assertFalse(
                 url.equals(LOGIN_URL),
@@ -39,7 +39,7 @@ public class LoginTest extends BaseTest {
 
         String url      = loginPage.getCurrentUrl();
         String errorMsg = loginPage.getErrorMessage();
-        System.out.println("✅ Invalid login - URL: " + url + " | Error: " + errorMsg);
+        System.out.println("Invalid login - URL: " + url + " | Error: " + errorMsg);
 
         Assert.assertTrue(
                 url.contains("/login") || !errorMsg.isEmpty(),
@@ -55,7 +55,7 @@ public class LoginTest extends BaseTest {
 
         String url      = loginPage.getCurrentUrl();
         String errorMsg = loginPage.getErrorMessage();
-        System.out.println("✅ Wrong password - URL: " + url + " | Error: " + errorMsg);
+        System.out.println(" Wrong password - URL: " + url + " | Error: " + errorMsg);
 
         Assert.assertTrue(
                 url.contains("/login") || !errorMsg.isEmpty(),
@@ -70,7 +70,7 @@ public class LoginTest extends BaseTest {
         try { Thread.sleep(1000); } catch (Exception ignored) {}
 
         String url = loginPage.getCurrentUrl();
-        System.out.println("✅ Empty fields URL: " + url);
+        System.out.println("Empty fields URL: " + url);
         Assert.assertTrue(url.contains("/login"), "Should stay on login page");
     }
 
@@ -81,7 +81,7 @@ public class LoginTest extends BaseTest {
         try { Thread.sleep(1000); } catch (Exception ignored) {}
 
         String url = loginPage.getCurrentUrl();
-        System.out.println("✅ Invalid email URL: " + url);
+        System.out.println(" Invalid email URL: " + url);
         Assert.assertTrue(url.contains("/login"), "Should stay on login page");
     }
 
@@ -93,7 +93,7 @@ public class LoginTest extends BaseTest {
 
         String errorMsg = loginPage.getErrorMessage();
         String url      = loginPage.getCurrentUrl();
-        System.out.println("✅ Error: " + errorMsg + " | URL: " + url);
+        System.out.println(" Error: " + errorMsg + " | URL: " + url);
 
         Assert.assertTrue(
                 url.contains("/login") || !errorMsg.isEmpty(),
@@ -105,7 +105,7 @@ public class LoginTest extends BaseTest {
     @Test
     public void testLoginPageTitle() {
         String title = driver.getTitle();
-        System.out.println("✅ Page title: " + title);
+        System.out.println("Page title: " + title);
         Assert.assertFalse(title.isEmpty(), "Page title should not be empty");
     }
 
