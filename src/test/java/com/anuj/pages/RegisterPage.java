@@ -21,7 +21,7 @@ public class RegisterPage {
         this.js = (JavascriptExecutor) driver;
     }
 
-    // ✅ Locators
+    //  Locators
     private By nameField     = By.name("name");
     private By emailField    = By.name("email");
     private By passwordField = By.name("password");
@@ -30,7 +30,7 @@ public class RegisterPage {
     private By submitButton  = By.cssSelector("button[type='submit']");
     private By messageDiv    = By.cssSelector("div[style*='margin-top: 16px']");
 
-    // ✅ Fill form using JavaScript — bypasses HTML5 required validation
+    //  Fill form using JavaScript — bypasses HTML5 required validation
     public void register(String name, String email, String password,
                          String phone, String address) {
 
@@ -40,12 +40,12 @@ public class RegisterPage {
         fillField(phoneField, phone);
         fillField(addressField, address);
 
-        // ✅ Click via JavaScript — bypasses browser validation
+        // Click via JavaScript — bypasses browser validation
         WebElement btn = driver.findElement(submitButton);
         js.executeScript("arguments[0].click();", btn);
     }
 
-    // ✅ Helper — fill using JS to bypass HTML5 validation
+    // Helper — fill using JS to bypass HTML5 validation
     private void fillField(By locator, String value) {
         WebElement el = driver.findElement(locator);
         js.executeScript("arguments[0].removeAttribute('required')", el);
@@ -59,7 +59,7 @@ public class RegisterPage {
         );
     }
 
-    // ✅ Get success message
+    //  Get success message
     public String getSuccessMessage() {
         try {
             wait.until(ExpectedConditions.visibilityOfElementLocated(messageDiv));
