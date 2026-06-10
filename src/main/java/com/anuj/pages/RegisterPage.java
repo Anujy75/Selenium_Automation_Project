@@ -11,7 +11,7 @@ public class RegisterPage {
     private WebDriver driver;
     private WaitUtils waitUtils;
 
-    // ✅ Locators based on your actual Register component
+    // Locators based on your actual Register component
     @FindBy(name = "name")
     private WebElement nameInput;
 
@@ -30,18 +30,18 @@ public class RegisterPage {
     @FindBy(xpath = "//button[contains(text(), 'Create Account') or contains(text(), 'Creating Account')]")
     private WebElement registerButton;
 
-    // ✅ Message div (success or error)
+    // Message div (success or error)
     @FindBy(xpath = "//div[contains(@style, 'background') and contains(@style, '#e6f9f0')]")
     private WebElement successMessage;
 
     @FindBy(xpath = "//div[contains(@style, 'background') and contains(@style, '#fdecea')]")
     private WebElement errorMessage;
 
-    // ✅ Any toast/alert message
+    // Any toast/alert message
     @FindBy(xpath = "//div[@role='alert']")
     private WebElement alertMessage;
 
-    // ✅ Sign In link
+    // Sign In link
     @FindBy(xpath = "//a[contains(text(), 'Sign In')]")
     private WebElement signInLink;
 
@@ -51,7 +51,7 @@ public class RegisterPage {
         PageFactory.initElements(driver, this);
     }
 
-    // ✅ T070: Automate user registration flow
+    // T070: Automate user registration flow
     public void register(String name, String email, String password, String phone, String address) {
         waitUtils.waitForClickable(nameInput).sendKeys(name);
         waitUtils.waitForClickable(emailInput).sendKeys(email);
@@ -68,7 +68,7 @@ public class RegisterPage {
         waitUtils.waitForClickable(registerButton).click();
     }
 
-    // ✅ Get success message (green background)
+    //  Get success message (green background)
     public String getSuccessMessage() {
         try {
             waitUtils.waitForVisibility(successMessage);
@@ -78,7 +78,7 @@ public class RegisterPage {
         }
     }
 
-    // ✅ Get error message (red background)
+    //  get error message (red background)
     public String getErrorMessage() {
         try {
             waitUtils.waitForVisibility(errorMessage);
@@ -88,7 +88,7 @@ public class RegisterPage {
         }
     }
 
-    // ✅ Get any alert message
+    // Get any alert message
     public String getAlertMessage() {
         try {
             waitUtils.waitForVisibility(alertMessage);
@@ -98,7 +98,7 @@ public class RegisterPage {
         }
     }
 
-    // ✅ T071: Validate input fields
+    // T071: Validate input fields
     public boolean isNameFieldEmpty() {
         return nameInput.getAttribute("value").isEmpty();
     }
@@ -111,13 +111,13 @@ public class RegisterPage {
         return passwordInput.getAttribute("value").isEmpty();
     }
 
-    // ✅ Check if registration was successful (redirect to login page)
+    //  Check if registration was successful (redirect to login page)
     public boolean isRedirectedToLoginPage() {
         waitUtils.hardWait(2500); // Wait for redirect (2 seconds timeout in your code)
         return driver.getCurrentUrl().contains("/login");
     }
 
-    // ✅ Click Sign In link
+    // Click Sign In link
     public void clickSignInLink() {
         waitUtils.waitForClickable(signInLink).click();
     }
