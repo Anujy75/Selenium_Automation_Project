@@ -21,7 +21,7 @@ public class NavigationTest extends BaseTest {
 
         String currentUrl = driver.getCurrentUrl();
         Assert.assertTrue(currentUrl.contains("/products"), "Should navigate to products page");
-        System.out.println("✅ Navigated to: " + currentUrl);
+        System.out.println("Navigated to: " + currentUrl);
     }
 
     @Test
@@ -34,7 +34,7 @@ public class NavigationTest extends BaseTest {
 
         String currentUrl = driver.getCurrentUrl();
         Assert.assertTrue(currentUrl.contains("/cart"), "Should navigate to cart page");
-        System.out.println("✅ Navigated to: " + currentUrl);
+        System.out.println(" Navigated to: " + currentUrl);
     }
 
     @Test
@@ -46,6 +46,6 @@ public class NavigationTest extends BaseTest {
         wait.until(ExpectedConditions.urlContains("/"));
 
         String currentUrl = driver.getCurrentUrl();
-        System.out.println("✅ Navigated to Home: " + currentUrl);
+        System.out.println("Navigated to Home: " + currentUrl);
     }
 }
