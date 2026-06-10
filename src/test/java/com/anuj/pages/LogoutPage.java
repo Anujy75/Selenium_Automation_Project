@@ -15,12 +15,12 @@ public class LogoutPage {
     private WebDriverWait wait;
     private JavascriptExecutor js;
 
-    // ✅ Locators
+    //  Locators
     private By emailField    = By.name("email");
     private By passwordField = By.name("password");
     private By loginButton   = By.cssSelector("button[type='submit']");
 
-    // ✅ Fixed — button with logout style (background: #fff7f7)
+    //  Fixed — button with logout style (background: #fff7f7)
     private By signOutButton  = By.cssSelector("button[style*='fff7f7']");
     private By signOutByText  = By.xpath("//*[contains(text(),'Sign out')]");
     private By signOutByBtn   = By.xpath("//button[.//*[contains(text(),'Sign out')]]");
@@ -31,7 +31,7 @@ public class LogoutPage {
         this.js     = (JavascriptExecutor) driver;
     }
 
-    // ✅ Login
+    // Login
     public void login(String email, String password) {
         driver.get("http://localhost:3000/login/user");
         WebElement emailEl = wait.until(ExpectedConditions.visibilityOfElementLocated(emailField));
@@ -44,36 +44,36 @@ public class LogoutPage {
         try { Thread.sleep(2500); } catch (Exception e) {}
     }
 
-    // ✅ Profile page
+    //  Profile page
     public void goToProfile() {
         driver.get("http://localhost:3000/profile");
         try { Thread.sleep(2500); } catch (Exception e) {} // Framer Motion wait
     }
 
-    // ✅ Click Sign out — 4 fallback locators
+    //  Click Sign out — 4 fallback locators
     public void clickSignOut() {
         WebElement btn = null;
 
         // Try 1: button style
         try {
             btn = wait.until(ExpectedConditions.elementToBeClickable(signOutButton));
-            System.out.println("✅ Found via: button[style*='fff7f7']");
-        } catch (Exception e) { System.out.println("⚠️ Try 1 failed..."); }
+            System.out.println("Found via: button[style*='fff7f7']");
+        } catch (Exception e) { System.out.println(" Try 1 failed..."); }
 
         // Try 2: button containing span with text
         if (btn == null) {
             try {
                 btn = wait.until(ExpectedConditions.elementToBeClickable(signOutByBtn));
-                System.out.println("✅ Found via: button > Sign out text");
-            } catch (Exception e) { System.out.println("⚠️ Try 2 failed..."); }
+                System.out.println("Found via: button > Sign out text");
+            } catch (Exception e) { System.out.println(" Try 2 failed..."); }
         }
 
         // Try 3: any element with text
         if (btn == null) {
             try {
                 btn = wait.until(ExpectedConditions.elementToBeClickable(signOutByText));
-                System.out.println("✅ Found via: xpath text");
-            } catch (Exception e) { System.out.println("⚠️ Try 3 failed..."); }
+                System.out.println(" Found via: xpath text");
+            } catch (Exception e) { System.out.println(" Try 3 failed..."); }
         }
 
         // Try 4: JavaScript
@@ -83,15 +83,15 @@ public class LogoutPage {
                         "return Array.from(document.querySelectorAll('button'))" +
                                 ".find(b => b.textContent.trim().includes('Sign out'));"
                 );
-                System.out.println("✅ Found via: JavaScript");
-            } catch (Exception e) { System.out.println("❌ All locators failed"); }
+                System.out.println("Found via: JavaScript");
+            } catch (Exception e) { System.out.println(" All locators failed"); }
         }
 
         if (btn != null) {
             js.executeScript("arguments[0].scrollIntoView(true);", btn);
             try { Thread.sleep(500); } catch (Exception e) {}
             js.executeScript("arguments[0].click();", btn);
-            System.out.println("✅ Sign out clicked!");
+            System.out.println("Sign out clicked!");
         } else {
             throw new RuntimeException("Sign out button not found!");
         }
