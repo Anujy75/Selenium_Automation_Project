@@ -37,13 +37,7 @@
             <version>5.9.2</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-devtools-v130</artifactId>
-            <version>4.27.0</version>
-        </dependency>
-
-        <!-- Add after selenium-java dependency -->
+        <!-- Selenium DevTools - keep only one version (v131 is latest) -->
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-devtools-v131</artifactId>
