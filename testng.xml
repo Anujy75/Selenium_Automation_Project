@@ -3,7 +3,7 @@
 <suite name="ShopEase Complete Automation Suite">
 
     <parameter name="browser" value="chrome"/>
-    <parameter name="baseUrl" value="https://shopease.com"/>
+    <parameter name="baseUrl" value="http://localhost:3000"/>
 
     <!-- ========== US0015: Product Listing Module ========== -->
     <test name="US0015 - Product Listing Module">
@@ -14,8 +14,8 @@
             </run>
         </groups>
         <classes>
-            <class name="com.anuj.testcases.ProductValidationTest"/>
-            <class name="com.anuj.testcases.VerifyProductNavigationTest"/>
+            <class name="com.anuj.testcases.ProductDetailsValidationTest"/>
+            <class name="com.anuj.testcases.NavigationTest"/>
             <class name="com.anuj.testcases.ProductListingTest"/>
         </classes>
     </test>
@@ -33,6 +33,20 @@
     <test name="Navigation Module">
         <classes>
             <class name="com.anuj.testcases.NavigationTest"/>
+        </classes>
+    </test>
+
+    <!-- ========== US017: Add to Cart Module ========== -->
+    <test name="US017 - Add to Cart Module">
+        <classes>
+            <class name="com.anuj.testcases.AddToCartTest"/>
+        </classes>
+    </test>
+
+    <!-- ========== US019: Payment Flow Module ========== -->
+    <test name="US019 - Payment Flow Module">
+        <classes>
+            <class name="com.anuj.testcases.PaymentFlowTest"/>
         </classes>
     </test>
 

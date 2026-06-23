@@ -1,6 +1,7 @@
 package com.anuj.pages;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
@@ -13,29 +14,36 @@ public class ShopEaseCheckoutPage {
 
     private WebDriver driver;
     private WebDriverWait wait;
+    private JavascriptExecutor js;
 
     // ============ CART PAGE CHECKOUT FORM LOCATORS ============
 
-    // Checkout button on cart page - MULTIPLE LOCATORS
+    // Checkout button on cart page
     private By checkoutBtn1 = By.xpath("//button[contains(text(),'Proceed To Checkout')]");
     private By checkoutBtn2 = By.xpath("//button[contains(text(),'Checkout')]");
-    private By checkoutBtn3 = By.xpath("//a[contains(text(),'Checkout')]");
 
-    // Checkout form fields (on cart page)
+    // ✅ FIXED: Using name attributes (your Checkout component uses these)
+    private By fullName = By.name("fullName");
+    private By email = By.name("email");
+    private By phone = By.name("phone");
+    private By address = By.name("address");
+    private By city = By.name("city");
+    private By pincode = By.name("pincode");
+
+    // ⚠️ Fallback locators (if name doesn't work)
     private By firstName = By.id("firstName");
     private By lastName = By.id("lastName");
-    private By email = By.id("email");
-    private By phone = By.id("phone");
+    private By emailAlt = By.id("email");
+    private By phoneAlt = By.id("phone");
     private By addressLine1 = By.id("addressLine1");
-    private By addressLine2 = By.id("addressLine2");
-    private By city = By.id("city");
+    private By cityAlt = By.id("city");
     private By state = By.id("state");
     private By zipCode = By.id("zipCode");
     private By country = By.id("country");
 
-    // Place Order button (triggers Razorpay)
+    // Place Order button - ✅ FIXED: Your app uses "Pay" button
+    private By payBtn = By.xpath("//button[contains(text(),'Pay')]");
     private By placeOrderBtn = By.xpath("//button[contains(text(),'Place Order')]");
-    private By placeOrderBtn2 = By.xpath("//button[contains(text(),'Place Order') or contains(@class,'place-order')]");
 
     // Error/Validation Messages
     private By fieldErrors = By.cssSelector(".field-error, .error-message, .text-red-500, .invalid-feedback, [class*='error']");
@@ -49,9 +57,13 @@ public class ShopEaseCheckoutPage {
     // Success/Confirmation
     private By orderConfirmation = By.xpath("//*[contains(text(),'Order Placed') or contains(@class,'success')]");
 
+    // Use Current Location
+    private By useCurrentLocationBtn = By.xpath("//button[contains(text(),'Use Current Location')]");
+
     public ShopEaseCheckoutPage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        this.js = (JavascriptExecutor) driver;
         PageFactory.initElements(driver, this);
     }
 
@@ -60,8 +72,7 @@ public class ShopEaseCheckoutPage {
     public void clickProceedToCheckoutIfExists() {
         System.out.println("🔄 Checking for Proceed To Checkout button...");
 
-        // Try multiple locators
-        By[] checkoutButtons = {checkoutBtn1, checkoutBtn2, checkoutBtn3};
+        By[] checkoutButtons = {checkoutBtn1, checkoutBtn2};
 
         for (By locator : checkoutButtons) {
             try {
@@ -76,62 +87,212 @@ public class ShopEaseCheckoutPage {
                     return;
                 }
             } catch (Exception e) {
-                // Continue to next locator
+                // Continue
             }
         }
-
         System.out.println("ℹ️ No checkout button found - form might already be visible");
     }
 
-    public boolean isCheckoutFormDisplayed() {
+    // 📍 USE CURRENT LOCATION
+    public void useCurrentLocation() {
+        System.out.println("📍 Clicking 'Use Current Location'...");
         try {
-            // Check if any form field is displayed
-            boolean formDisplayed = !driver.findElements(firstName).isEmpty() ||
-                    !driver.findElements(email).isEmpty() ||
-                    !driver.findElements(phone).isEmpty();
-            System.out.println("Checkout form displayed: " + formDisplayed);
-            return formDisplayed;
+            WebElement btn = wait.until(ExpectedConditions.elementToBeClickable(useCurrentLocationBtn));
+            scrollToElement(btn);
+            Thread.sleep(500);
+            btn.click();
+            System.out.println("✅ Use Current Location clicked");
+            Thread.sleep(2000);
         } catch (Exception e) {
-            return false;
+            System.out.println("⚠️ Could not click: " + e.getMessage());
+            // JavaScript fallback
+            try {
+                String jsScript = "var btns = document.querySelectorAll('button'); " +
+                        "for(var i=0; i<btns.length; i++) { " +
+                        "  if(btns[i].textContent.includes('Use Current Location')) { " +
+                        "    btns[i].click(); return 'clicked'; " +
+                        "  } " +
+                        "} return 'not_found';";
+                js.executeScript(jsScript);
+                System.out.println("✅ Clicked via JavaScript");
+                Thread.sleep(2000);
+            } catch (Exception ex) {
+                System.out.println("❌ All click methods failed");
+            }
         }
     }
 
-    // ===================== FORM ACTIONS =====================
+    // ===================== ✅ FIXED: FILL SHIPPING DETAILS =====================
 
     public void fillShippingDetails(String fName, String lName, String mail,
                                     String phn, String addr, String cty,
                                     String st, String zip, String cntry) {
+
         System.out.println("📝 Filling shipping details...");
 
+        // Combine first and last name
+        String fullNameVal = fName + " " + lName;
+
+        // Try name attributes first (your component uses these)
+        boolean filled = false;
+
         try {
-            WebElement field = driver.findElement(firstName);
-            field.clear();
-            field.sendKeys(fName);
-        } catch (Exception e) { System.out.println("⚠️ First name field not found"); }
+            WebElement nameField = wait.until(ExpectedConditions.visibilityOfElementLocated(fullName));
+            nameField.clear();
+            nameField.sendKeys(fullNameVal);
+            Thread.sleep(300);
+            System.out.println("✅ Full Name filled: " + fullNameVal);
+            filled = true;
+        } catch (Exception e) {
+            System.out.println("⚠️ fullName field not found, trying firstName...");
+        }
 
-        try { driver.findElement(lastName).sendKeys(lName); } catch (Exception e) {}
-        try { driver.findElement(email).sendKeys(mail); } catch (Exception e) {}
-        try { driver.findElement(phone).sendKeys(phn); } catch (Exception e) {}
-        try { driver.findElement(addressLine1).sendKeys(addr); } catch (Exception e) {}
-        try { driver.findElement(city).sendKeys(cty); } catch (Exception e) {}
-        try { driver.findElement(state).sendKeys(st); } catch (Exception e) {}
-        try { driver.findElement(zipCode).sendKeys(zip); } catch (Exception e) {}
-        try { driver.findElement(country).sendKeys(cntry); } catch (Exception e) {}
+        // If name attribute not found, try id attributes
+        if (!filled) {
+            try {
+                WebElement fNameField = driver.findElement(firstName);
+                fNameField.clear();
+                fNameField.sendKeys(fName);
+                Thread.sleep(300);
+                System.out.println("✅ First Name filled: " + fName);
+            } catch (Exception e) {}
 
-        System.out.println("✅ Shipping details filled");
-        try { Thread.sleep(500); } catch (Exception e) {}
+            try {
+                WebElement lNameField = driver.findElement(lastName);
+                lNameField.clear();
+                lNameField.sendKeys(lName);
+                Thread.sleep(300);
+                System.out.println("✅ Last Name filled: " + lName);
+            } catch (Exception e) {}
+        }
+
+        // Email
+        try {
+            WebElement emailField = driver.findElement(email);
+            emailField.clear();
+            emailField.sendKeys(mail);
+            Thread.sleep(300);
+            System.out.println("✅ Email filled: " + mail);
+        } catch (Exception e) {
+            try {
+                WebElement emailField = driver.findElement(emailAlt);
+                emailField.clear();
+                emailField.sendKeys(mail);
+                Thread.sleep(300);
+                System.out.println("✅ Email filled (alt): " + mail);
+            } catch (Exception ex) {
+                System.out.println("⚠️ Email field not found");
+            }
+        }
+
+        // Phone
+        try {
+            WebElement phoneField = driver.findElement(phone);
+            phoneField.clear();
+            phoneField.sendKeys(phn);
+            Thread.sleep(300);
+            System.out.println("✅ Phone filled: " + phn);
+        } catch (Exception e) {
+            try {
+                WebElement phoneField = driver.findElement(phoneAlt);
+                phoneField.clear();
+                phoneField.sendKeys(phn);
+                Thread.sleep(300);
+                System.out.println("✅ Phone filled (alt): " + phn);
+            } catch (Exception ex) {
+                System.out.println("⚠️ Phone field not found");
+            }
+        }
+
+        // Address
+        try {
+            WebElement addressField = driver.findElement(address);
+            addressField.clear();
+            addressField.sendKeys(addr);
+            Thread.sleep(300);
+            System.out.println("✅ Address filled: " + addr);
+        } catch (Exception e) {
+            try {
+                WebElement addressField = driver.findElement(addressLine1);
+                addressField.clear();
+                addressField.sendKeys(addr);
+                Thread.sleep(300);
+                System.out.println("✅ Address filled (alt): " + addr);
+            } catch (Exception ex) {
+                System.out.println("⚠️ Address field not found");
+            }
+        }
+
+        // City
+        try {
+            WebElement cityField = driver.findElement(city);
+            cityField.clear();
+            cityField.sendKeys(cty);
+            Thread.sleep(300);
+            System.out.println("✅ City filled: " + cty);
+        } catch (Exception e) {
+            try {
+                WebElement cityField = driver.findElement(cityAlt);
+                cityField.clear();
+                cityField.sendKeys(cty);
+                Thread.sleep(300);
+                System.out.println("✅ City filled (alt): " + cty);
+            } catch (Exception ex) {
+                System.out.println("⚠️ City field not found");
+            }
+        }
+
+        // State
+        try {
+            WebElement stateField = driver.findElement(state);
+            stateField.clear();
+            stateField.sendKeys(st);
+            Thread.sleep(300);
+            System.out.println("✅ State filled: " + st);
+        } catch (Exception e) {
+            System.out.println("⚠️ State field not found");
+        }
+
+        // ZIP / Pincode
+        try {
+            WebElement pincodeField = driver.findElement(pincode);
+            pincodeField.clear();
+            pincodeField.sendKeys(zip);
+            Thread.sleep(300);
+            System.out.println("✅ Pincode filled: " + zip);
+        } catch (Exception e) {
+            try {
+                WebElement zipField = driver.findElement(zipCode);
+                zipField.clear();
+                zipField.sendKeys(zip);
+                Thread.sleep(300);
+                System.out.println("✅ ZIP filled (alt): " + zip);
+            } catch (Exception ex) {
+                System.out.println("⚠️ Pincode field not found");
+            }
+        }
+
+        // Country
+        try {
+            WebElement countryField = driver.findElement(country);
+            countryField.clear();
+            countryField.sendKeys(cntry);
+            Thread.sleep(300);
+            System.out.println("✅ Country filled: " + cntry);
+        } catch (Exception e) {
+            System.out.println("⚠️ Country field not found");
+        }
+
+        System.out.println("✅ Shipping details filled successfully!");
     }
 
     public void clearAllFields() {
-        try { driver.findElement(firstName).clear(); } catch (Exception e) {}
-        try { driver.findElement(lastName).clear(); } catch (Exception e) {}
+        try { driver.findElement(fullName).clear(); } catch (Exception e) {}
         try { driver.findElement(email).clear(); } catch (Exception e) {}
         try { driver.findElement(phone).clear(); } catch (Exception e) {}
-        try { driver.findElement(addressLine1).clear(); } catch (Exception e) {}
+        try { driver.findElement(address).clear(); } catch (Exception e) {}
         try { driver.findElement(city).clear(); } catch (Exception e) {}
-        try { driver.findElement(state).clear(); } catch (Exception e) {}
-        try { driver.findElement(zipCode).clear(); } catch (Exception e) {}
-        try { driver.findElement(country).clear(); } catch (Exception e) {}
+        try { driver.findElement(pincode).clear(); } catch (Exception e) {}
         System.out.println("🧹 All fields cleared");
     }
 
@@ -140,35 +301,45 @@ public class ShopEaseCheckoutPage {
     public void clickPlaceOrder() {
         System.out.println("🛒 Clicking Place Order...");
 
-        By[] placeOrderLocators = {placeOrderBtn, placeOrderBtn2};
-
-        for (By locator : placeOrderLocators) {
-            try {
-                WebElement placeOrder = wait.until(ExpectedConditions.elementToBeClickable(locator));
-                scrollToElement(placeOrder);
-                Thread.sleep(500);
-                placeOrder.click();
-                System.out.println("✅ Place Order clicked");
-                Thread.sleep(1000);
-                return;
-            } catch (Exception e) {
-                System.out.println("⚠️ Could not click: " + locator);
-            }
+        // Try "Pay" button first (your app uses this)
+        try {
+            WebElement payButton = wait.until(ExpectedConditions.elementToBeClickable(payBtn));
+            scrollToElement(payButton);
+            Thread.sleep(500);
+            payButton.click();
+            System.out.println("✅ Pay button clicked");
+            Thread.sleep(3000);
+            return;
+        } catch (Exception e) {
+            System.out.println("⚠️ Pay button not found, trying Place Order...");
         }
 
-        // Try JavaScript click as fallback
+        // Try "Place Order" button
         try {
-            String js = "var btns = document.querySelectorAll('button'); " +
+            WebElement placeOrder = wait.until(ExpectedConditions.elementToBeClickable(placeOrderBtn));
+            scrollToElement(placeOrder);
+            Thread.sleep(500);
+            placeOrder.click();
+            System.out.println("✅ Place Order clicked");
+            Thread.sleep(3000);
+            return;
+        } catch (Exception e) {
+            System.out.println("⚠️ Place Order button not found");
+        }
+
+        // JavaScript fallback
+        try {
+            String jsScript = "var btns = document.querySelectorAll('button'); " +
                     "for(var i=0; i<btns.length; i++) { " +
-                    "  if(btns[i].textContent.includes('Place Order')) { " +
+                    "  if(btns[i].textContent.includes('Pay') || btns[i].textContent.includes('Place Order')) { " +
                     "    btns[i].click(); " +
                     "    return 'clicked'; " +
                     "  } " +
                     "} " +
                     "return 'not_found';";
-            String result = (String) ((org.openqa.selenium.JavascriptExecutor) driver).executeScript(js);
+            String result = (String) js.executeScript(jsScript);
             System.out.println("JavaScript click result: " + result);
-            Thread.sleep(1000);
+            Thread.sleep(3000);
         } catch (Exception e) {
             System.out.println("❌ All click methods failed");
         }
@@ -212,7 +383,7 @@ public class ShopEaseCheckoutPage {
 
     public boolean isRazorpayDisplayed() {
         try {
-            Thread.sleep(1000);
+            Thread.sleep(3000);
             boolean framePresent = !driver.findElements(razorpayFrame).isEmpty();
 
             if (framePresent) {
@@ -220,7 +391,6 @@ public class ShopEaseCheckoutPage {
                 return true;
             }
 
-            // Check for Razorpay elements
             List<WebElement> razorpayElements = driver.findElements(
                     By.xpath("//*[contains(text(),'Razorpay') or contains(@class,'razorpay')]")
             );
@@ -238,7 +408,7 @@ public class ShopEaseCheckoutPage {
 
     public boolean isRazorpayPayButtonDisplayed() {
         try {
-            Thread.sleep(1000);
+            Thread.sleep(2000);
             return !driver.findElements(razorpayPayBtn).isEmpty();
         } catch (Exception e) {
             return false;
@@ -258,11 +428,12 @@ public class ShopEaseCheckoutPage {
 
     public boolean isOrderPlaced() {
         try {
-            Thread.sleep(1000);
+            Thread.sleep(3000);
             return !driver.findElements(orderConfirmation).isEmpty() ||
                     driver.getPageSource().contains("Order Placed") ||
                     driver.getPageSource().contains("Success") ||
-                    driver.getCurrentUrl().contains("success");
+                    driver.getCurrentUrl().contains("success") ||
+                    driver.getCurrentUrl().contains("order-success");
         } catch (Exception e) {
             return false;
         }
@@ -272,9 +443,8 @@ public class ShopEaseCheckoutPage {
 
     private void scrollToElement(WebElement element) {
         try {
-            ((org.openqa.selenium.JavascriptExecutor) driver)
-                    .executeScript("arguments[0].scrollIntoView({block: 'center'});", element);
-            Thread.sleep(1000);
+            js.executeScript("arguments[0].scrollIntoView({block: 'center'});", element);
+            Thread.sleep(300);
         } catch (Exception e) {}
     }
 

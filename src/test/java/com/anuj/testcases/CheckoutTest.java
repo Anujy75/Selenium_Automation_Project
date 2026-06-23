@@ -31,16 +31,10 @@ public class CheckoutTest extends BaseTest {
         addToCartPage = new ShopEaseAddToCartPage(driver);
         checkoutPage = new ShopEaseCheckoutPage(driver);
 
-        // Login (reusing your method)
         addToCartPage.login(EMAIL, PASSWORD);
-
-        // Add product to cart (reusing your method)
         addToCartPage.gotoProductListingPage();
         addToCartPage.addProductToCart(0);
         addToCartPage.gotoCartPage();
-
-        // ⭐ The checkout form might already be visible on cart page
-        // Try to click Proceed To Checkout if needed
         checkoutPage.clickProceedToCheckoutIfExists();
     }
 
@@ -50,20 +44,12 @@ public class CheckoutTest extends BaseTest {
     public void testEmptyFieldValidation() {
         System.out.println("========== TC01: Empty Field Validation ==========");
 
-        // Clear all fields (if they exist)
         checkoutPage.clearAllFields();
-
-        // Click Place Order
         checkoutPage.clickPlaceOrder();
 
-        // Wait for validation
         try { Thread.sleep(1000); } catch (Exception e) {}
 
-        // Check for error messages
         boolean hasErrors = checkoutPage.hasErrorMessages();
-
-        // If Razorpay opens instead of validation, that means no client-side validation
-        // which is also valid
         boolean razorpayOpened = checkoutPage.isRazorpayDisplayed();
 
         if (razorpayOpened) {
@@ -75,7 +61,6 @@ public class CheckoutTest extends BaseTest {
             errors.forEach(error -> System.out.println("  - " + error));
             System.out.println("✅ Empty field validation passed with " + errors.size() + " errors");
         } else {
-            // Check if any required fields exist
             boolean hasRequired = checkoutPage.areFieldsRequired();
             System.out.println("Has required fields: " + hasRequired);
             System.out.println("✅ No validation triggered - application may handle validation differently");
@@ -90,19 +75,15 @@ public class CheckoutTest extends BaseTest {
     public void testFillValidDetails() {
         System.out.println("========== TC02: Fill Valid Details ==========");
 
-        // Fill valid details
         checkoutPage.fillShippingDetails(
                 FIRST_NAME, LAST_NAME, USER_EMAIL, PHONE,
                 ADDRESS, CITY, STATE, ZIP, COUNTRY
         );
 
-        // Click Place Order
         checkoutPage.clickPlaceOrder();
 
-        // Wait for Razorpay
         try { Thread.sleep(1000); } catch (Exception e) {}
 
-        // Check if Razorpay opens OR order is placed
         boolean razorpayOpened = checkoutPage.isRazorpayDisplayed();
         boolean orderPlaced = checkoutPage.isOrderPlaced();
 
@@ -110,8 +91,6 @@ public class CheckoutTest extends BaseTest {
             System.out.println("✅ Razorpay opened successfully");
             boolean payBtn = checkoutPage.isRazorpayPayButtonDisplayed();
             System.out.println("Razorpay Pay Button: " + (payBtn ? "✅" : "❌"));
-
-            // Close Razorpay
             checkoutPage.closeRazorpayModal();
         } else if (orderPlaced) {
             System.out.println("✅ Order placed successfully!");
@@ -129,33 +108,25 @@ public class CheckoutTest extends BaseTest {
     public void testRazorpayIntegration() {
         System.out.println("========== TC03: Razorpay Integration ==========");
 
-        // Fill valid details
         checkoutPage.fillShippingDetails(
                 FIRST_NAME, LAST_NAME, USER_EMAIL, PHONE,
                 ADDRESS, CITY, STATE, ZIP, COUNTRY
         );
 
-        // Click Place Order
         checkoutPage.clickPlaceOrder();
 
-        // Wait for Razorpay
         try { Thread.sleep(1000); } catch (Exception e) {}
 
-        // Validate Razorpay is displayed
         boolean razorpayShown = checkoutPage.isRazorpayDisplayed();
 
         if (razorpayShown) {
             System.out.println("✅ Razorpay modal is displayed");
-
-            // Check Pay button
             boolean payBtn = checkoutPage.isRazorpayPayButtonDisplayed();
             if (payBtn) {
                 System.out.println("✅ Razorpay Pay button is present");
             } else {
                 System.out.println("⚠️ Razorpay Pay button not found");
             }
-
-            // Close Razorpay
             checkoutPage.closeRazorpayModal();
         } else {
             System.out.println("⚠️ Razorpay not displayed - checking if order placed");
@@ -172,7 +143,6 @@ public class CheckoutTest extends BaseTest {
     public void testInvalidDataValidation() {
         System.out.println("========== TC04: Invalid Data Validation ==========");
 
-        // Fill invalid data
         checkoutPage.fillShippingDetails(
                 "A",           // Too short
                 "Y",           // Too short
@@ -185,13 +155,10 @@ public class CheckoutTest extends BaseTest {
                 "I"            // Invalid country
         );
 
-        // Click Place Order
         checkoutPage.clickPlaceOrder();
 
-        // Wait for validation
         try { Thread.sleep(1000); } catch (Exception e) {}
 
-        // Check for errors or Razorpay
         boolean hasErrors = checkoutPage.hasErrorMessages();
         boolean razorpayOpened = checkoutPage.isRazorpayDisplayed();
 
@@ -204,7 +171,6 @@ public class CheckoutTest extends BaseTest {
             errors.forEach(error -> System.out.println("  - " + error));
             System.out.println("✅ Invalid data validation passed with " + errors.size() + " errors");
         } else {
-            // Could be server-side validation
             System.out.println("⚠️ No client-side errors and no Razorpay - checking page");
             String pageSource = driver.getPageSource();
             if (pageSource.contains("error") || pageSource.contains("invalid")) {
