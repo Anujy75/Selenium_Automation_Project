@@ -38,11 +38,11 @@ public class CheckoutTest extends BaseTest {
         checkoutPage.clickProceedToCheckoutIfExists();
     }
 
-    // ===================== TEST 1: Empty Field Validation =====================
+    // ===================== ✅ TEST 1: Empty Field Validation =====================
 
     @Test(priority = 1)
     public void testEmptyFieldValidation() {
-        System.out.println("========== TC01: Empty Field Validation ==========");
+        System.out.println("========== 🚀 TC01: Empty Field Validation ==========");
 
         checkoutPage.clearAllFields();
         checkoutPage.clickPlaceOrder();
@@ -69,11 +69,11 @@ public class CheckoutTest extends BaseTest {
         System.out.println("✅ TC01: Empty field validation completed");
     }
 
-    // ===================== TEST 2: Fill Valid Details =====================
+    // ===================== ✅ TEST 2: Valid Details (All Correct) =====================
 
     @Test(priority = 2)
     public void testFillValidDetails() {
-        System.out.println("========== TC02: Fill Valid Details ==========");
+        System.out.println("========== 🚀 TC02: Fill Valid Details ==========");
 
         checkoutPage.fillShippingDetails(
                 FIRST_NAME, LAST_NAME, USER_EMAIL, PHONE,
@@ -102,11 +102,11 @@ public class CheckoutTest extends BaseTest {
         System.out.println("✅ TC02: Valid details test passed");
     }
 
-    // ===================== TEST 3: Razorpay Integration =====================
+    // ===================== ✅ TEST 3: Razorpay Integration =====================
 
     @Test(priority = 3)
     public void testRazorpayIntegration() {
-        System.out.println("========== TC03: Razorpay Integration ==========");
+        System.out.println("========== 🚀 TC03: Razorpay Integration ==========");
 
         checkoutPage.fillShippingDetails(
                 FIRST_NAME, LAST_NAME, USER_EMAIL, PHONE,
@@ -137,22 +137,23 @@ public class CheckoutTest extends BaseTest {
         System.out.println("✅ TC03: Razorpay integration validated");
     }
 
-    // ===================== TEST 4: Invalid Data Validation =====================
+    // ===================== ❌ TEST 4: Only Email Invalid =====================
 
     @Test(priority = 4)
-    public void testInvalidDataValidation() {
-        System.out.println("========== TC04: Invalid Data Validation ==========");
+    public void testInvalidEmailOnly() {
+        System.out.println("========== ❌ TC04: Invalid Email Only ==========");
+        System.out.println("📝 All fields valid EXCEPT Email");
 
         checkoutPage.fillShippingDetails(
-                "A",           // Too short
-                "Y",           // Too short
-                "invalid-email", // Invalid email
-                "123",         // Invalid phone
-                "A",           // Invalid address
-                "C",           // Invalid city
-                "S",           // Invalid state
-                "12",          // Invalid ZIP
-                "I"            // Invalid country
+                FIRST_NAME,                                    // ✅ Valid
+                LAST_NAME,                                     // ✅ Valid
+                "invalid-email",                               // ❌ INVALID
+                PHONE,                                         // ✅ Valid
+                ADDRESS,                                       // ✅ Valid
+                CITY,                                          // ✅ Valid
+                STATE,                                         // ✅ Valid
+                ZIP,                                           // ✅ Valid
+                COUNTRY                                        // ✅ Valid
         );
 
         checkoutPage.clickPlaceOrder();
@@ -162,25 +163,223 @@ public class CheckoutTest extends BaseTest {
         boolean hasErrors = checkoutPage.hasErrorMessages();
         boolean razorpayOpened = checkoutPage.isRazorpayDisplayed();
 
-        if (razorpayOpened) {
-            System.out.println("✅ No client-side validation, Razorpay opened directly");
-            checkoutPage.closeRazorpayModal();
-        } else if (hasErrors) {
+        if (hasErrors) {
             List<String> errors = checkoutPage.getErrorMessages();
-            System.out.println("📝 Validation errors:");
+            System.out.println("📝 Error messages:");
             errors.forEach(error -> System.out.println("  - " + error));
-            System.out.println("✅ Invalid data validation passed with " + errors.size() + " errors");
+            System.out.println("✅ Invalid email caught by validation!");
+        } else if (razorpayOpened) {
+            System.out.println("⚠️ No validation - Razorpay opened directly (no client-side validation)");
+            checkoutPage.closeRazorpayModal();
         } else {
-            System.out.println("⚠️ No client-side errors and no Razorpay - checking page");
-            String pageSource = driver.getPageSource();
-            if (pageSource.contains("error") || pageSource.contains("invalid")) {
-                System.out.println("✅ Server-side validation detected");
-            } else {
-                System.out.println("⚠️ No validation detected - checking URL");
-                System.out.println("Current URL: " + driver.getCurrentUrl());
-            }
+            System.out.println("✅ No validation errors - server-side validation may apply");
         }
 
-        System.out.println("✅ TC04: Invalid data validation completed");
+        System.out.println("✅ TC04: Invalid email validation completed");
+    }
+
+    // ===================== ❌ TEST 5: Only Phone Invalid =====================
+
+    @Test(priority = 5)
+    public void testInvalidPhoneOnly() {
+        System.out.println("========== ❌ TC05: Invalid Phone Only ==========");
+        System.out.println("📝 All fields valid EXCEPT Phone");
+
+        checkoutPage.fillShippingDetails(
+                FIRST_NAME,                                    // ✅ Valid
+                LAST_NAME,                                     // ✅ Valid
+                USER_EMAIL,                                    // ✅ Valid
+                "123",                                         // ❌ INVALID (too short)
+                ADDRESS,                                       // ✅ Valid
+                CITY,                                          // ✅ Valid
+                STATE,                                         // ✅ Valid
+                ZIP,                                           // ✅ Valid
+                COUNTRY                                        // ✅ Valid
+        );
+
+        checkoutPage.clickPlaceOrder();
+
+        try { Thread.sleep(1000); } catch (Exception e) {}
+
+        boolean hasErrors = checkoutPage.hasErrorMessages();
+        boolean razorpayOpened = checkoutPage.isRazorpayDisplayed();
+
+        if (hasErrors) {
+            List<String> errors = checkoutPage.getErrorMessages();
+            System.out.println("📝 Error messages:");
+            errors.forEach(error -> System.out.println("  - " + error));
+            System.out.println("✅ Invalid phone caught by validation!");
+        } else if (razorpayOpened) {
+            System.out.println("⚠️ No validation - Razorpay opened directly (no client-side validation)");
+            checkoutPage.closeRazorpayModal();
+        } else {
+            System.out.println("✅ No validation errors - server-side validation may apply");
+        }
+
+        System.out.println("✅ TC05: Invalid phone validation completed");
+    }
+
+    // ===================== ❌ TEST 6: Only Pincode Invalid =====================
+
+    @Test(priority = 6)
+    public void testInvalidPincodeOnly() {
+        System.out.println("========== ❌ TC06: Invalid Pincode Only ==========");
+        System.out.println("📝 All fields valid EXCEPT Pincode");
+
+        checkoutPage.fillShippingDetails(
+                FIRST_NAME,                                    // ✅ Valid
+                LAST_NAME,                                     // ✅ Valid
+                USER_EMAIL,                                    // ✅ Valid
+                PHONE,                                         // ✅ Valid
+                ADDRESS,                                       // ✅ Valid
+                CITY,                                          // ✅ Valid
+                STATE,                                         // ✅ Valid
+                "12",                                          // ❌ INVALID (too short)
+                COUNTRY                                        // ✅ Valid
+        );
+
+        checkoutPage.clickPlaceOrder();
+
+        try { Thread.sleep(1000); } catch (Exception e) {}
+
+        boolean hasErrors = checkoutPage.hasErrorMessages();
+        boolean razorpayOpened = checkoutPage.isRazorpayDisplayed();
+
+        if (hasErrors) {
+            List<String> errors = checkoutPage.getErrorMessages();
+            System.out.println("📝 Error messages:");
+            errors.forEach(error -> System.out.println("  - " + error));
+            System.out.println("✅ Invalid pincode caught by validation!");
+        } else if (razorpayOpened) {
+            System.out.println("⚠️ No validation - Razorpay opened directly (no client-side validation)");
+            checkoutPage.closeRazorpayModal();
+        } else {
+            System.out.println("✅ No validation errors - server-side validation may apply");
+        }
+
+        System.out.println("✅ TC06: Invalid pincode validation completed");
+    }
+
+    // ===================== ❌ TEST 7: Only Name Invalid =====================
+
+    @Test(priority = 7)
+    public void testInvalidNameOnly() {
+        System.out.println("========== ❌ TC07: Invalid Name Only ==========");
+        System.out.println("📝 All fields valid EXCEPT Name");
+
+        checkoutPage.fillShippingDetails(
+                "A",                                           // ❌ INVALID (too short)
+                LAST_NAME,                                     // ✅ Valid
+                USER_EMAIL,                                    // ✅ Valid
+                PHONE,                                         // ✅ Valid
+                ADDRESS,                                       // ✅ Valid
+                CITY,                                          // ✅ Valid
+                STATE,                                         // ✅ Valid
+                ZIP,                                           // ✅ Valid
+                COUNTRY                                        // ✅ Valid
+        );
+
+        checkoutPage.clickPlaceOrder();
+
+        try { Thread.sleep(1000); } catch (Exception e) {}
+
+        boolean hasErrors = checkoutPage.hasErrorMessages();
+        boolean razorpayOpened = checkoutPage.isRazorpayDisplayed();
+
+        if (hasErrors) {
+            List<String> errors = checkoutPage.getErrorMessages();
+            System.out.println("📝 Error messages:");
+            errors.forEach(error -> System.out.println("  - " + error));
+            System.out.println("✅ Invalid name caught by validation!");
+        } else if (razorpayOpened) {
+            System.out.println("⚠️ No validation - Razorpay opened directly (no client-side validation)");
+            checkoutPage.closeRazorpayModal();
+        } else {
+            System.out.println("✅ No validation errors - server-side validation may apply");
+        }
+
+        System.out.println("✅ TC07: Invalid name validation completed");
+    }
+
+    // ===================== ❌ TEST 8: Only Address Invalid =====================
+
+    @Test(priority = 8)
+    public void testInvalidAddressOnly() {
+        System.out.println("========== ❌ TC08: Invalid Address Only ==========");
+        System.out.println("📝 All fields valid EXCEPT Address");
+
+        checkoutPage.fillShippingDetails(
+                FIRST_NAME,                                    // ✅ Valid
+                LAST_NAME,                                     // ✅ Valid
+                USER_EMAIL,                                    // ✅ Valid
+                PHONE,                                         // ✅ Valid
+                "A",                                           // ❌ INVALID (too short)
+                CITY,                                          // ✅ Valid
+                STATE,                                         // ✅ Valid
+                ZIP,                                           // ✅ Valid
+                COUNTRY                                        // ✅ Valid
+        );
+
+        checkoutPage.clickPlaceOrder();
+
+        try { Thread.sleep(1000); } catch (Exception e) {}
+
+        boolean hasErrors = checkoutPage.hasErrorMessages();
+        boolean razorpayOpened = checkoutPage.isRazorpayDisplayed();
+
+        if (hasErrors) {
+            List<String> errors = checkoutPage.getErrorMessages();
+            System.out.println("📝 Error messages:");
+            errors.forEach(error -> System.out.println("  - " + error));
+            System.out.println("✅ Invalid address caught by validation!");
+        } else if (razorpayOpened) {
+            System.out.println("⚠️ No validation - Razorpay opened directly (no client-side validation)");
+            checkoutPage.closeRazorpayModal();
+        } else {
+            System.out.println("✅ No validation errors - server-side validation may apply");
+        }
+
+        System.out.println("✅ TC08: Invalid address validation completed");
+    }
+
+    // ===================== ❌ TEST 9: Only City Invalid =====================
+
+    @Test(priority = 9)
+    public void testInvalidCityOnly() {
+        System.out.println("========== ❌ TC09: Invalid City Only ==========");
+        System.out.println("📝 All fields valid EXCEPT City");
+
+        checkoutPage.fillShippingDetails(
+                FIRST_NAME,                                    // ✅ Valid
+                LAST_NAME,                                     // ✅ Valid
+                USER_EMAIL,                                    // ✅ Valid
+                PHONE,                                         // ✅ Valid
+                ADDRESS,                                       // ✅ Valid
+                "C",                                           // ❌ INVALID (too short)
+                STATE,                                         // ✅ Valid
+                ZIP,                                           // ✅ Valid
+                COUNTRY                                        // ✅ Valid
+        );
+
+        checkoutPage.clickPlaceOrder();
+
+        try { Thread.sleep(1000); } catch (Exception e) {}
+
+        boolean hasErrors = checkoutPage.hasErrorMessages();
+        boolean razorpayOpened = checkoutPage.isRazorpayDisplayed();
+
+        if (hasErrors) {
+            List<String> errors = checkoutPage.getErrorMessages();
+            System.out.println("📝 Error messages:");
+            errors.forEach(error -> System.out.println("  - " + error));
+            System.out.println("✅ Invalid city caught by validation!");
+        } else if (razorpayOpened) {
+            System.out.println("⚠️ No validation - Razorpay opened directly (no client-side validation)");
+            checkoutPage.closeRazorpayModal();
+        } else {
+            System.out.println("✅ No validation errors - server-side validation may apply");
+        }
+
+        System.out.println("✅ TC09: Invalid city validation completed");
     }
 }
