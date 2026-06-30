@@ -12,6 +12,7 @@ import java.time.Duration;
 
 public class BaseTest {
 
+
     protected WebDriver driver;
     protected WebDriverWait wait;
 
@@ -25,7 +26,7 @@ public class BaseTest {
     public void setUp() {
         System.out.println("🚀 Setting up WebDriver...");
 
-        // Chrome options for better stability
+        // ✅ Step 1: Options pehle
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--no-sandbox");
@@ -33,19 +34,20 @@ public class BaseTest {
         options.addArguments("--disable-popup-blocking");
         options.addArguments("--remote-allow-origins=*");
 
-        // Optional: Run in headless mode (uncomment if needed)
-        // options.addArguments("--headless");
-
+        // ✅ Step 2: Driver initialize karo
         driver = new ChromeDriver(options);
+
+        // ✅ Step 3: Ab manage() call karo — driver null nahi hai ab
         driver.manage().window().maximize();
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
+        driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(30));
 
         wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 
         System.out.println("✅ WebDriver setup complete");
 
-        // ── Check if application is reachable ────────────────
+        // ── Check if application is reachable ──
         try {
             System.out.println("🌐 Checking application at: " + BASE_URL);
             driver.get(BASE_URL);
@@ -53,13 +55,9 @@ public class BaseTest {
         } catch (Exception e) {
             System.err.println("❌ ERROR: Application not reachable at " + BASE_URL);
             System.err.println("❌ Please make sure your application is running!");
-            System.err.println("❌ Backend: http://localhost:8080");
-            System.err.println("❌ Frontend: http://localhost:3000");
             System.err.println("❌ Error: " + e.getMessage());
-            // Don't throw exception, let tests fail gracefully
         }
     }
-
     @AfterMethod
     public void tearDown() {
         if (driver != null) {
